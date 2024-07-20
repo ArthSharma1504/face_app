@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Face Detection App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #cameraStatus, #result {
+      margin: 20px 0;
+      font-size: 18px;
+      color: #555;
+    }
+    #videoFeed, #capturedImage {
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    #videoFeed {
+      width: 100%;
+      max-width: 600px;
+    }
+    #capturedImage {
+      display: none;
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Face Detection App</h1>
+    <button id="startCamera"><i class="fas fa-video"></i> Start Camera</button>
+    <button id="stopCamera"><i class="fas fa-stop"></i> Stop Camera</button>
+    <div id="cameraStatus"></div>
+    <button id="startDetection"><i class="fas fa-camera"></i> Start Detection</button>
+    <div id="result"></div>
+    <img id="capturedImage" src="" alt="Captured Image"/>
+    <img id="videoFeed" src="/video_feed" alt="Video Feed"/>
+    <br>
+    <!-- Button to navigate to the CRUD page -->
+    <button id="manageImages"><i class="fas fa-images"></i> Manage Images</button>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#startCamera').click(function() {
+        $.post('/start_camera', function(data) {
+          $('#cameraStatus').text(data.message);
+        });
+      });
+
+      $('#stopCamera').click(function() {
+        $.post('/stop_camera', function(data) {
+          $('#cameraStatus').text(data.message);
+          $('#videoFeed').attr('src', '');  // Clear the video feed
+        });
+      });
+
+      $('#startDetection').click(function() {
+        $.post('/start_detection', function(data) {
+          if (data.status === 'success') {
+            $('#result').text('Image saved as ' + data.file_path);
+            $('#capturedImage').attr('src', data.file_path).show();
+          } else {
+            $('#result').text('Error: ' + data.message);
+          }
+        });
+      });
+
+      $('#manageImages').click(function() {
+        window.location.href = "{{ url_for('manage_images') }}"; // Redirect to the CRUD page
+      });
+    });
+  </script>
+</body>
+</html>

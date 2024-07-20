@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Images</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 1000px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    img {
+      max-width: 150px;
+      max-height: 100px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+    }
+    .btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+    .status {
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Manage Captured Images</h1>
+    <a href="{{ url_for('index') }}" class="btn"><i class="fas fa-camera"></i> Back to Capture</a>
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Enrollment Number</th>
+          <th>Gender</th>
+          <th>Year</th>
+          <th>Department</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for filename, details in images.items() %}
+        <tr id="row-{{ filename }}">
+          <td><img src="{{ url_for('get_image', filename=filename) }}" alt="Image"></td>
+          <td>{{ details.name }}</td>
+          <td>{{ details.enrollment_number }}</td>
+          <td>{{ details.gender }}</td>
+          <td>{{ details.year }}</td>
+          <td>{{ details.department }}</td>
+          <td>
+            <button class="btn-danger delete-btn" data-filename="{{ filename }}">Delete</button>
+            <a href="{{ url_for('get_image', filename=filename) }}" download class="btn">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="status-message"></div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('.delete-btn').click(function() {
+        const filename = $(this).data('filename');
+        const row = $(this).closest('tr');
+        $.ajax({
+          url: `/delete_image/${filename}`,
+          type: 'POST',
+          success: function(response) {
+            if (response.status === 'success') {
+              row.remove();
+              $('#status-message').text('Image deleted successfully').addClass('status').removeClass('error');
+            } else {
+              $('#status-message').text('Error: ' + response.message).addClass('error').removeClass('status');
+            }
+          },
+          error: function() {
+            $('#status-message').text('An error occurred').addClass('error').removeClass('status');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
